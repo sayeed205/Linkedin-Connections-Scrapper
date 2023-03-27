@@ -62,10 +62,16 @@ svg {
 code + a {
   font-size: 12px;
   font-family: inherit;
-  background-color: rgba(89, 163, 252, 0.3);
   padding: 2px 4px;
   border-radius: 2px;
   text-decoration: none;
+}
+code,
+a {
+  background-color: rgba(89, 163, 252, 0.3);
+  padding: 2px 4px;
+  border-radius: 2px;
+  font-weight: 600;
 }
 
 a:link,
@@ -95,6 +101,7 @@ a:active {
 
 .button-container {
   margin-top: 15px;
+  display: none;
 }
 
 .button {
@@ -143,4 +150,39 @@ a:active {
   display: flex;
   position: relative;
   height: 50px;
+}
+
+#tooltip {
+  position: relative;
+  font-size: 18px;
+  color: white;
+  background-color: #000;
+  border-radius: 50%;
+  padding: 2.5px 10px;
+  display: inline-block;
+  bottom: 50%;
+  left: -77%;
+}
+
+#tooltip #tooltip-text {
+  visibility: hidden;
+  width: 200px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  font-size: small;
+  position: absolute;
+  z-index: 1;
+  bottom: -350%;
+  left: 150%;
+  margin-left: -140px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+#tooltip:hover #tooltip-text {
+  visibility: visible;
+  opacity: 1;
 }
