@@ -39,7 +39,37 @@ const showButtons = (): void => {
   buttonContainer[0].style.display = "block";
 };
 
-const downloadConnections = (): void => {};
+const downloadConnections = ({
+  type,
+  activeTab,
+}: {
+  type: string;
+  activeTab: chrome.tabs.Tab;
+}): void => {
+  if (!activeTab.id) return;
+  // Send message to content script to get connection data
+  chrome.tabs.sendMessage(
+    activeTab.id,
+    { type: "DOWNLOAD", format: type },
+    (res) => {
+      // todo)) will deal with this later
+    }
+  );
+
+  // Update the buttons and show the progress bar
+  const buttonContainer = document.getElementsByClassName(
+    "button-container"
+  ) as HTMLCollectionOf<HTMLElement>;
+  buttonContainer[0].style.display = "none";
+  // add progress bar here and update it as the data is being downloaded
+  // todo))
+
+  // todo)) add event listener to cancel button to send message to content script to cancel the download
+
+  // todo)) add event listener to content script to update the progress bar
+
+  // todo)) add event listener to content script if the download is cancelled or completed to update the header text and buttons
+};
 
 // URL for LinkedIn's Connections page
 const connectionPageUrl =
@@ -64,7 +94,13 @@ const connectionPageUrl =
     showButtons();
     showConnectionsCount(activeTab);
     // todo)) add event listener to buttons to send message to content script
-    downloadConnections();
+
+    document.getElementById("json")?.addEventListener("click", () => {
+      downloadConnections({ type: "JSON", activeTab });
+    });
+    document.getElementById("csv")?.addEventListener("click", () => {
+      downloadConnections({ type: "CSV", activeTab });
+    });
   } else {
     // If not on Connections page, display message and add click event listener to LinkedIn icon
     const header = document.getElementById("header") as HTMLElement;
