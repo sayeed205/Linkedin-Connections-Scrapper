@@ -12,9 +12,9 @@ jobs:
         run: npm install
       - name: Build
         run: npm run build
-      # After building the files we need to compress them into a zip file so that we can upload them to the release with file name with version number
+      # After building the files we need to compress them into a zip file so that we can upload them to the release with file name with version number from package.json
       - name: Compress files
-        run: zip -r ${{ github.event.repository.name }}-${{ github.sha }}.zip build
+        run: zip -r ${{ github.event.repository.name }}-${{ github.event.release.tag_name }}.zip build
       # Upload the zip file to the release
       - name: Upload release asset
         id: upload-release-asset
@@ -22,7 +22,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./${{ github.event.repository.name }}-${{ github.sha }}.zip
-          asset_name: ${{ github.event.repository.name }}-${{ github.sha }}.zip
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./${{ github.event.repository.name }}-${{ github.event.release.tag_name }}.zip
+          asset_name: ${{ github.event.repository.name }}-${{ github.event.release.tag_name }}.zip
           asset_content_type: application/zip
