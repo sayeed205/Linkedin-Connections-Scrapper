@@ -18,16 +18,22 @@ jobs:
       - name: Build app
         run: npm run build
 
+      - name: package.json info
+        id: info
+        uses: jaywcjlove/github-action-package@main
+
+      # - name: Zip build folder
+      #   run: zip -r ${{ github.event.repository.name }}-${{ github.sha }}.zip build
       - name: Zip build folder
-        run: zip -r ${{ github.event.repository.name }}-${{ github.sha }}.zip build
+        run: zip -r ${{ github.event.repository.name }}-${{ steps.info.outputs.version }}.zip build
 
       - name: Create release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
         with:
-          tag_name: v${{ github.package-json.version }}
-          release_name: Release v${{ github.package-json.version }}
+          tag_name: v${{ steps.info.outputs.version }}
+          release_name: Release v${{ steps.info.outputs.version }}
           draft: false
           prerelease: false
 
@@ -37,6 +43,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.PAT }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./${{ github.event.repository.name }}-${{ github.sha }}.zip
-          asset_name: ${{ github.event.repository.name }}-${{ github.sha }}.zip
+          asset_path: ./${{ github.event.repository.name }}-${{ steps.info.outputs.version }}.zip
+          asset_name: ${{ github.event.repository.name }}-${{ steps.info.outputs.version }}.zip
           asset_content_type: application/zip
