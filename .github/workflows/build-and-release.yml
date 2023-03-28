@@ -1,39 +1,44 @@
 name: Build and Release
+
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v2
-      - name: Install dependencies
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install Node.js dependencies
         run: npm install
-      - name: Build
+
+      - name: Build app
         run: npm run build
-      # After building the files we need to compress them into a zip file so that we can upload them to the release with file name and version number
-      - name: Compress files
-        run: zip -r ${{ github.event.repository.name }}-${{ github.sha }}.zip build
-        #  Create a release
-      - name: Create Release
-        id: create_release
+
+      - name: Create release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          tag_name: v${{ github.package-json.version }}
+          release_name: Release v${{ github.package-json.version }}
           draft: false
           prerelease: false
-      # Upload the zip file to the release as an asset
-      - name: Upload Release Asset
-        id: upload-release-asset
+
+      - name: Zip build folder
+        uses: montudor/action-zip@v0.2.0
+        with:
+          args: -r ${{ github.repository }}-v${{ github.package-json.version }}.zip build
+
+      - name: Upload release asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./${{ github.event.repository.name }}-${{ github.sha }}.zip
-          asset_name: ${{ github.event.repository.name }}-${{ github.sha }}.zip
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./${{ github.repository }}-v${{ github.package-json.version }}.zip
+          asset_name: ${{ github.repository }}-v${{ github.package-json.version }}.zip
           asset_content_type: application/zip
