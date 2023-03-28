@@ -22,12 +22,11 @@ jobs:
         id: info
         uses: jaywcjlove/github-action-package@main
 
-      # - name: Zip build folder
-      #   run: zip -r ${{ github.event.repository.name }}-${{ github.sha }}.zip build
       - name: Zip build folder
         run: zip -r ${{ github.event.repository.name }}-${{ steps.info.outputs.version }}.zip build
 
       - name: Create release
+        id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
@@ -42,7 +41,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
         with:
-          upload_url: ${{ github.event.release.upload_url }}
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./${{ github.event.repository.name }}-${{ steps.info.outputs.version }}.zip
           asset_name: ${{ github.event.repository.name }}-${{ steps.info.outputs.version }}.zip
           asset_content_type: application/zip
