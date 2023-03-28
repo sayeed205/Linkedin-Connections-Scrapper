@@ -21,7 +21,7 @@ jobs:
       - name: Create release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT }}
         with:
           tag_name: v${{ github.package-json.version }}
           release_name: Release v${{ github.package-json.version }}
@@ -36,7 +36,7 @@ jobs:
       - name: Upload release asset
         uses: actions/upload-release-asset@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: ./${{ github.repository }}-v${{ github.package-json.version }}.zip
