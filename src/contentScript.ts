@@ -48,6 +48,9 @@ const headers = {
 // Initialize memberIdentity array which will store public identifiers of all connections
 let memberIdentity: string[] = [];
 
+// Set global variable to set cancel status
+let cancelStatus = false;
+
 /**
  * This function retrieves the total number of LinkedIn connections for the current user.
  * It first gets an HTML node containing the connection count from the DOM. Then it makes an API call to get
@@ -132,10 +135,14 @@ const downloadConnections = async (type: DownloadFormat): Promise<void> => {
     connections.push(filterDetails(data));
 
     // Send message to popup script to update progress bar based on current iteration count
+    // this reaching upto 97% how to make it 100%?
+
     chrome.runtime.sendMessage({
       type: "PROGRESS",
       payload: {
-        progress: Math.round((i / memberIdentity.length) * 100),
+        progress: Math.round(((i + 1) / memberIdentity.length) * 100),
+        count: i + 1,
+        total: memberIdentity.length,
       },
     });
 
@@ -151,6 +158,12 @@ const downloadConnections = async (type: DownloadFormat): Promise<void> => {
       });
 
       download(type, connections);
+    }
+
+    // cancel the download if user clicks on cancel button
+    if (cancelStatus) {
+      console.log("Download cancelled triggered");
+      return;
     }
 
     // Increment index variable and recursively call 'loop' function with a 1 second delay
@@ -278,22 +291,22 @@ const download = (type: DownloadFormat, connections: ConnectionData[]) => {
 /**
  * This function listens for messages from other parts of the extension or from external sources.
  * It takes a request object, sender object and sendResponse callback as parameters.
- *
- *  //todo)) add more details about the request object and define types or interfaces for the request object
  */
 chrome.runtime.onMessage.addListener(
   (
-    req: any,
+    req: { type: string; format?: DownloadFormat },
     sender: chrome.runtime.MessageSender,
     sendRes: (response?: any) => void
   ): boolean => {
     // If the message type is CONNECTION_COUNT
+    console.log(req);
     if (req.type === "CONNECTION_COUNT") {
       // Call getConnectionCount() function which returns a Promise that resolves to connection count
       getConnectionCount().then(sendRes);
     }
     // If the message type is DOWNLOAD
     else if (req.type === "DOWNLOAD") {
+      cancelStatus = false;
       // Check format property of request object to determine download format
       if (req.format === "CSV") {
         // Call downloadConnections() function with CSV parameter to download connections as CSV file
@@ -302,6 +315,11 @@ chrome.runtime.onMessage.addListener(
         // Call downloadConnections() function with JSON parameter to download connections as JSON file
         downloadConnections("JSON");
       }
+    } else if (req.type === "CANCEL_DOWNLOAD") {
+      console.log("Cancel download message received");
+      // If the message type is CANCEL_DOWNLOAD, set the cancelDownload variable to true
+      cancelStatus = true;
+      sendRes();
     }
 
     return true; // Return true so that sendResponse can be called asynchronously later on.
