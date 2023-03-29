@@ -1,7 +1,5 @@
 # Linkedin-Connections-Scrapper
 
-<!-- Write down readme about this extension -->
-
 This is a chrome extension to scrap your linkedin connections and export them to a csv or json file.
 
 ## Installation
