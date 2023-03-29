@@ -1,6 +1,6 @@
 {
   "name": "linkedin-connections-scrapper",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Scrape connections details from https://www.linkedin.com/",
   "private": true,
   "scripts": {
