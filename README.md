@@ -17,6 +17,12 @@ This is a chrome extension to scrap your linkedin connections and export them to
 3. Select the format you want to export the data to.
 4. Wait for the download to complete.
 
+##TODO
+
+- [x] Add support for json format.
+- [x] Add support for csv format.
+- [ ] Cancel the download if the user navigates away from the page or closes the popup.
+
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
