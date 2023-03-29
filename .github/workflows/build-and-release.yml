@@ -2,8 +2,8 @@ name: Build and Release
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - "v*"
 
 jobs:
   build:
@@ -13,43 +13,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Get current version
-        id: get_version
-        run: echo ::set-output name=VERSION::$(node -p "require('./package.json').version")
-
-      - name: Get previous version
-        id: get_previous_version
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event.commits[0].id != github.event.before
-        run: |
-          git fetch --depth=1 origin +refs/heads/main
-          echo ::set-output name=PREVIOUS_VERSION::$(git log -1 --pretty=format:%s $(git merge-base HEAD FETCH_HEAD) | sed -nE 's/^[^0-9]*(([0-9]+\.)*[0-9]+)[^0-9]*$/\1/p')
-
-      - name: Compare versions
-        id: compare_versions
-        if: steps.get_previous_version.outputs.PREVIOUS_VERSION != ''
-        run: |
-          echo "${{ steps.get_previous_version.outputs.PREVIOUS_VERSION }}" "${{ steps.get_version.outputs.VERSION }}"
-          test "${{ steps.get_previous_version.outputs.PREVIOUS_VERSION }}" != "${{ steps.get_version.outputs.VERSION }}"
-
       - name: Install Node.js dependencies
-        if: steps.compare_versions.outputs.result || !steps.compare_versions.outputs.result
         run: npm install
 
       - name: Build app
-        if: steps.compare_versions.outputs.result || !steps.compare_versions.outputs.result
         run: npm run build
 
       - name: package.json info
-        if: steps.compare_versions.outputs.result || !steps.compare_versions.outputs.result
         id: info
         uses: jaywcjlove/github-action-package@main
 
       - name: Zip build folder
-        if: steps.compare_versions.outputs.result || !steps.compare_versions.outputs.result
         run: zip -r ${{ github.event.repository.name }}-${{ steps.info.outputs.version }}.zip build
 
       - name: Create release
-        if: steps.compare_versions.outputs.result || !steps.compare_versions.outputs.result
         id: create_release
         uses: actions/create-release@v1
         env:
@@ -61,7 +38,6 @@ jobs:
           prerelease: false
 
       - name: Upload release asset
-        if: steps.compare_versions.outputs.result || !steps.compare_versions.outputs.result
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
