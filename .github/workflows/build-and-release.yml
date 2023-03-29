@@ -2,10 +2,8 @@ name: Build and Release
 
 on:
   push:
-    # tags:
-    #   - "v*"
-    branches:
-      - master
+    branches: [main]
+    tags: [v*]
 
 jobs:
   build:
@@ -25,7 +23,6 @@ jobs:
         id: info
         uses: jaywcjlove/github-action-package@main
 
-        #
       - name: Zip build folder
         run: zip -r ${{ github.event.repository.name }}-${{ steps.info.outputs.version }}.zip build
 
